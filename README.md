@@ -76,6 +76,17 @@ The following insights have been identified during the EDA phase, which will gui
 - **Limited Missingness**: The dataset contains some missing values, but they are limited. This informs the selection of imputation strategies to fill in missing data without losing too much information.
 
 ---
+## Project Structure
+
+The repository follows a modular, production-oriented structure:
+
+- `notebooks/`: Exploratory analysis (EDA only)
+- `src/`: Reusable, production-ready Python modules for data processing and modeling
+- `tests/`: Unit tests for validating core data processing logic
+- `data/`: Raw and processed data (excluded from version control)
+
+  Missing values will be handled using median imputation for skewed numerical features such as Amount and Value, as median is robust to outliers. Categorical features such as ProductCategory and ChannelId will be imputed using the mode to preserve the most frequent behavior patterns. These choices balance robustness with simplicity and are appropriate for transactional data.
+
 
 ## Next Steps
 
