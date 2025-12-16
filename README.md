@@ -87,17 +87,211 @@ The repository follows a modular, production-oriented structure:
 
   Missing values will be handled using median imputation for skewed numerical features such as Amount and Value, as median is robust to outliers. Categorical features such as ProductCategory and ChannelId will be imputed using the mode to preserve the most frequent behavior patterns. These choices balance robustness with simplicity and are appropriate for transactional data.
 
+]
 
-## Next Steps
+## ⚙️ Task 3 — Feature Engineering & Data Processing
 
-### Feature Engineering
+### Objective
 
-Based on the insights from EDA, the next steps involve:
+Transform raw transaction-level data into a model-ready, reproducible dataset using a fully automated preprocessing pipeline compliant with production and regulatory standards.
 
-- **Transforming skewed features** (e.g., applying log-transformation to transaction values).
-- **Handling imbalanced customer behavior** (e.g., using techniques like SMOTE for balancing customer engagement).
-- **Creating new features** (e.g., RFM metrics to represent customer behavior).
+### Implementation Overview
 
+Feature engineering is implemented as reusable, production-ready code in:
+
+`src/data_processing.py`
+
+The transformation logic is built using `sklearn.pipeline.Pipeline` and `ColumnTransformer` to ensure:
+
+* **Reproducibility**
+* **Clear separation** of numerical and categorical transformations
+* **Compatibility** with model training and deployment 
+
+### Feature Engineering Steps
+
+1.  **Temporal Feature Extraction**
+    * From `TransactionStartTime`, the following features are derived: `transaction_hour`, `transaction_day`, `transaction_month`, `transaction_year`.
+    * These features capture customer behavioral patterns across time.
+
+2.  **Aggregate Customer-Level Features**
+    * For each `CustomerId`, the following aggregates are computed: **Total Transaction Amount**, **Average Transaction Amount**, **Transaction Count**, **Standard Deviation of Transaction Amounts**.
+    * These features capture spending intensity, frequency, and variability.
+
+3.  **Missing Value Handling**
+    * Explicit imputation strategies are applied:
+        * *Numerical features* → Median imputation (robust to skewness and outliers)
+        * *Categorical features* → Mode imputation (preserves dominant behavioral patterns)
+
+4.  **Encoding & Scaling**
+    * Categorical variables are encoded using **One-Hot Encoding**
+    * Numerical variables are standardized using **StandardScaler**
+
+### Output
+
+The processing function returns:
+
+* A processed dataframe
+* A fitted preprocessing pipeline ready for model training and inference
+
+---
+
+## 🎯 Task 4 — Proxy Target Variable Engineering
+
+### Objective
+
+Create a proxy credit risk target variable (`is_high_risk`) in the absence of an explicit default label.
+
+### Methodology
+
+1.  **RFM Metric Calculation**
+    * For each customer:
+        * **Recency:** Days since last transaction (based on a snapshot date)
+        * **Frequency:** Number of transactions
+        * **Monetary:** Total transaction amount
+    * 
+
+2.  **Customer Segmentation via Clustering**
+    * **K-Means clustering** (k = 3) is applied to scaled RFM features
+    * `random_state` is fixed to ensure reproducibility
+
+3.  **High-Risk Label Assignment**
+    * The cluster characterized by **low frequency** and **low monetary value** is identified as the least engaged (highest-risk) segment
+    * Customers in this cluster are labeled: `is_high_risk = 1`
+    * All others = 0
+
+4.  **Integration**
+    * The target variable is merged back into the processed dataset for supervised learning.
+
+Implementation is located in:
+
+`src/target_engineering.py`
+
+---
+
+## 🔬 Task 5 — Model Training, Evaluation & Experiment Tracking
+
+### Objective
+
+Develop a structured, auditable model training workflow with experiment tracking and evaluation.
+
+### Setup
+
+The following tools are used:
+
+* **MLflow** for experiment tracking and model registry 
+* **pytest** for unit testing
+* **scikit-learn** for modeling
+
+### Models Trained
+
+At least two models are trained and compared:
+
+* **Logistic Regression** (baseline, interpretable)
+* **Tree-based models** (Decision Tree / Random Forest / Gradient Boosting)
+
+### Hyperparameter Tuning
+
+**Grid Search** or **Random Search** is used to optimize model parameters
+
+* Best models are selected based on validation performance
+
+### Evaluation Metrics
+
+Models are evaluated using:
+
+* Accuracy
+* Precision
+* Recall
+* F1 Score
+* **ROC-AUC** 
+
+### Experiment Tracking
+
+For each experiment, MLflow logs:
+
+* Model parameters
+* Evaluation metrics
+* Model artifacts
+
+The best-performing model is registered in the **MLflow Model Registry**.
+
+---
+
+## 🚀 Task 6 — Model Deployment & CI/CD
+
+### Objective
+
+Deploy the trained credit risk model as a containerized REST API with automated testing and quality checks.
+
+### FastAPI Service
+
+The API is implemented in:
+
+`src/api/main.py`
+
+Key Features
+
+* Loads the best model from MLflow
+* Exposes a `/predict` endpoint
+* Accepts structured customer transaction data
+* Returns a credit risk probability
+* Request and response validation is handled using **Pydantic** models.
+
+### Dockerization
+
+#### `Dockerfile`
+
+A `Dockerfile` at the repository root builds a lightweight production image:
+
+* Python 3.10 slim base
+* Installs dependencies
+* Runs the FastAPI app using Uvicorn
+
+#### `Docker Compose`
+
+`docker-compose.yml` enables local deployment with:
+
+* Port mapping (`8000:8000`)
+* MLflow tracking URI configuration
+
+The service can be started locally using:
+
+```bash
+docker-compose build
+docker-compose up
+```
+
+Swagger UI is available at:
+```bash
+
+http://localhost:8000/docs
+```
+CI/CD with GitHub Actions
+A CI pipeline is defined in:
+```bash
+
+.github/workflows/ci.yml
+```
+Automated Checks on Every Push
+   - Code linting (flake8 / black)
+   - Unit tests using pytest
+
+The build fails automatically if:
+   - Code style checks fail
+   - Unit tests fail
+
+This ensures consistent code quality and prevents regressions.
+
+
+###  Summary
+This project follows an end-to-end, production-grade credit risk modeling pipeline aligned with Basel II principles:
+
+   - Business understanding & regulatory context
+   - Transparent EDA
+   - Reproducible feature engineering
+   - Proxy target creation
+   - Tracked model training & evaluation
+   - Containerized deployment with CI/CD
 
 
 ## License
