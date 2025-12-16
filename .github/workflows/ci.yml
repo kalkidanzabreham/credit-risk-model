@@ -26,8 +26,11 @@ jobs:
       - name: Run linter
         run: |
           flake8 src --max-line-length=88
-        continue-on-error: true
+        continue-on-error: true # Keeping this for the linting errors you still have
 
       - name: Run unit tests
+        # The 'env' block adds the current directory's 'src' folder to the PYTHONPATH
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/src
         run: |
           pytest tests
