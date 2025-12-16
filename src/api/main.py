@@ -16,7 +16,7 @@ model = mlflow.sklearn.load_model(
     f"models:/{MODEL_NAME}/{MODEL_STAGE}"
 )
 preprocessor = mlflow.sklearn.load_model(
-    f"models:/{PREPROCESSOR_NAME}/latest" 
+    f"models:/{PREPROCESSOR_NAME}/latest"
 )
 
 

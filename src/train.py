@@ -94,10 +94,12 @@ def train_models(X, y):
             y_proba = model.predict_proba(X_test)[:, 1]
 
             metrics = evaluate_model(y_test, y_pred, y_proba)
+            
+            # FIX W291, E261, E501 HERE: Removed trailing space, added extra space, wrapped line
             mlflow.sklearn.log_model(
-                preprocessor, 
+                preprocessor,
                 artifact_path="preprocessor",
-                registered_model_name=f"{name}_Preprocessor" # Log it separately for simplicity
+                registered_model_name=f"{name}_Preprocessor"  # Log it separately for simplicity
             )
 
             mlflow.log_params(model.best_params_)

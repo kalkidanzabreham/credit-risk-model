@@ -3,9 +3,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
-
 from src.utils import parse_transaction_time
-
 
 
 def create_customer_aggregates(df):
