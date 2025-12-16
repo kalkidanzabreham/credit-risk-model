@@ -94,6 +94,11 @@ def train_models(X, y):
             y_proba = model.predict_proba(X_test)[:, 1]
 
             metrics = evaluate_model(y_test, y_pred, y_proba)
+            mlflow.sklearn.log_model(
+                preprocessor, 
+                artifact_path="preprocessor",
+                registered_model_name=f"{name}_Preprocessor" # Log it separately for simplicity
+            )
 
             mlflow.log_params(model.best_params_)
             mlflow.log_metrics(metrics)
@@ -105,5 +110,5 @@ def train_models(X, y):
 
 
 if __name__ == "__main__":
-    X, y, preprocessor = load_and_prepare_data("data/raw/transactions.csv")
+    X, y, preprocessor = load_and_prepare_data("data/raw/data.csv")
     train_models(X, y)
