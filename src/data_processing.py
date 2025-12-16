@@ -1,4 +1,3 @@
-
 import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
@@ -87,6 +86,8 @@ def prepare_model_dataset(df: pd.DataFrame):
 
     return df, preprocessor
 
+
+## FIX E302 HERE: Added second blank line
 def load_data(filepath: str) -> pd.DataFrame:
     """
     Load raw transaction data from CSV.
@@ -98,6 +99,7 @@ def load_data(filepath: str) -> pd.DataFrame:
         raise RuntimeError(f"Failed to load data from {filepath}: {e}")
 
 
+## FIX E302 HERE: Added second blank line
 def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     """
     Handle missing values using explicit, justified strategies.
@@ -107,7 +109,11 @@ def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
     numerical_cols = ["Amount", "Value"]
-    categorical_cols = ["ProductCategory", "ChannelId", "CountryCode", "PricingStrategy"]
+    
+    # FIX E501 HERE: Wrapped the line
+    categorical_cols = [
+        "ProductCategory", "ChannelId", "CountryCode", "PricingStrategy"
+    ]
 
     for col in numerical_cols:
         if col in df.columns:

@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  # 1. Your API service
+  credit-risk-api:
+    # ... (no change needed here)
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow-server:5000 
+    depends_on:
+      - mlflow-server
+      
+  # 2. MLflow Tracking Server (KEY CHANGE HERE)
+  mlflow-server:
+    image: ghcr.io/mlflow/mlflow:latest
+    ports:
+      - "5000:5000"
+    command: [
+        "mlflow", 
+        "server", 
+        "--host", "0.0.0.0", 
+        "--port", "5000",
+        "--allowed-hosts", "*",  # Allow all host headers internally for simplicity
+        "--cors-allowed-origins", "*" # Often helpful for API testing
+    ] 
+    # NOTE: You can be more specific with "--allowed-hosts mlflow-server,localhost,127.0.0.1"
+    volumes:
+      # Creates a named volume to persist the MLflow data (database and artifacts)
+      - mlflow_data:/mlflow
+    # --- END ADDITION ---
+
+# --- ADD THIS SECTION AT THE BOTTOM ---
+volumes:
+  mlflow_data:

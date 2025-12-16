@@ -6,3 +6,7 @@ seaborn
 tensorflow
 mlflow
 pytest
+fastapi
+uvicorn
+flake8
+

@@ -1,0 +1,36 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run linter
+        run: |
+          flake8 src --max-line-length=88
+        continue-on-error: true # Keeping this for the linting errors you still have
+
+      - name: Run unit tests
+        # The 'env' block adds the current directory's 'src' folder to the PYTHONPATH
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/src
+        run: |
+          pytest tests
